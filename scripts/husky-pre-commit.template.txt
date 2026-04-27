@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# このファイルの内容を、プロジェクト初期化時に .husky/pre-commit にコピーして使う
+# セットアップ手順:
+#   npm install
+#   npx husky init
+#   cp scripts/husky-pre-commit.template.txt .husky/pre-commit
+#   chmod +x .husky/pre-commit
+
+. "$(dirname -- "$0")/_/husky.sh" 2>/dev/null || true
+
+# 禁止ワード検出（失敗時はコミット停止）
+bash scripts/check-before-publish.sh

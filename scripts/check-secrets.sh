@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# CI 向けの secrets パターン検出（公開リポ同梱版）。
+#
+# ローカル用の scripts/check-before-publish.sh は、親ディレクトリの
+# _docs/DANGER-WORDS.txt（個人情報 / プロジェクト固有の非公開語 / secrets を列挙）を
+# 参照するため、CI 環境では参照先が存在せず動かない。
+#
+# このスクリプトは「公開リポに書いても問題ないパターン」= secret のプレフィックス
+# のみを対象にして、CI の最低限の安全ネットを担う。個人情報や企業名は公開リポに
+# 列挙すること自体が公開行為になるため、ローカル側でのみ検査する設計。
+
+set -eu
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+# GitHub PAT / Anthropic API Key / Google API Key / AWS Access Key のプレフィックス。
+# 長さは実在フォーマットに合わせて下限を指定。
+SECRET_PATTERNS='ghp_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{50,}|sk-ant-[A-Za-z0-9_\-]{20,}|sk-proj-[A-Za-z0-9_\-]{20,}|AIza[A-Za-z0-9_\-]{35}|AKIA[A-Z0-9]{16}'
+
+EXCLUDES=(
+  --exclude-dir=node_modules
+  --exclude-dir=.git
+  --exclude-dir=.next
+  --exclude-dir=.nuxt
+  --exclude-dir=.output
+  --exclude-dir=dist
+  --exclude-dir=build
+  --exclude-dir=coverage
+  --exclude-dir=playwright-report
+  --exclude-dir=test-results
+  --exclude-dir=.wrangler
+  --exclude-dir=.open-next
+  --exclude-dir=.husky
+  --exclude=".env"
+  --exclude=".env.*"
+  --exclude=".dev.vars"
+  --exclude="check-secrets.sh"
+)
+
+echo "Scanning for secret patterns (CI-safe subset)..."
+hits="$(grep -rnE "${EXCLUDES[@]}" -- "$SECRET_PATTERNS" . 2>/dev/null || true)"
+
+if [ -z "$hits" ]; then
+  echo "OK: secret patterns not found"
+  exit 0
+fi
+
+# ヒット値そのものは出力しない（transcript / ログ露出回避）。
+count=$(printf '%s\n' "$hits" | wc -l | tr -d ' ')
+echo "!! HIT: $count 件の secret らしき文字列を検出"
+echo "値は伏字表示。該当行を確認して削除すること:"
+printf '%s\n' "$hits" | awk -F: 'NF>=3 {printf "  %s:%s: [REDACTED]\n", $1, $2}' | head -20
+exit 1

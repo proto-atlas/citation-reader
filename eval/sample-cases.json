@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ja-edge-summary",
+    "questionLanguage": "ja",
+    "documentText": "エッジコンピューティングと AI 推論の融合は、2020 年代後半のアプリケーション設計における大きな潮流のひとつになっている。Cloudflare Workers は V8 isolates をベースに世界 330 以上の拠点で同時にコードを実行できる。しかし 1 リクエスト当たり CPU 時間 30 秒、メモリ 128 MiB の制約があり、重い ML モデルを Worker 内に同梱することは現実的でない。",
+    "question": "このドキュメントの主要な論点を日本語 200 文字以内で要約してください。各主張には引用を付けてください。"
+  },
+  {
+    "id": "en-cost-protection",
+    "questionLanguage": "en",
+    "documentText": "AI inference cost protection is a real-world challenge when calling LLM APIs from Cloudflare Workers. Most LLM APIs are billed per token, and a single request can move tens of cents. If users close the page mid-request, the server-side inference often continues, accumulating invisible costs. Bridging the client AbortSignal to the SDK's stream.abort() is essential.",
+    "question": "Summarize the key points in English within 150 words, with citations from the source."
+  },
+  {
+    "id": "ja-citation-density",
+    "questionLanguage": "ja",
+    "documentText": "Cloudflare Workers の rate limiting binding は、env.RATE_LIMITER.limit({ key }) 経由で sliding window を取得する。in-memory Map で実装した場合は isolate 単位で独立し、複数 isolate に分散すると最悪 N 倍まで通る制約がある。本格運用には binding か Durable Objects への移行が必要。",
+    "question": "rate limiting binding と in-memory 実装の違いを 3 つの引用元と共に日本語で説明してください。"
+  }
+]
