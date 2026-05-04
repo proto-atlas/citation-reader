@@ -1,0 +1,27 @@
+{
+  "runDate": "2026-04-29",
+  "tool": "@axe-core/playwright",
+  "command": "npm run e2e -- --project=chromium e2e/a11y.spec.ts --workers=1",
+  "project": "chromium",
+  "passed": true,
+  "blockingImpactLevels": ["critical", "serious"],
+  "scenarios": [
+    {
+      "name": "login screen",
+      "criticalSeriousViolations": []
+    },
+    {
+      "name": "authenticated empty state",
+      "criticalSeriousViolations": []
+    },
+    {
+      "name": "answer with citation state",
+      "criticalSeriousViolations": []
+    }
+  ],
+  "notes": [
+    "The Playwright webServer uses the E2E-only ACCESS_PASSWORD from playwright.config.ts.",
+    "The chat response is mocked in the answer-with-citation scenario, so no Anthropic API call or billing occurs.",
+    "Next.js development-mode eval warnings were observed during the local Playwright webServer run. The app does not include unsafe-eval in production CSP."
+  ]
+}
