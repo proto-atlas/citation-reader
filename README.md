@@ -165,7 +165,7 @@ GitHub Actions (`.github/workflows/ci.yml`) で以下 3 ジョブが走ります
 - [`deployment-2026-04-28.md`](./docs/evidence/deployment-2026-04-28.md) — Cloudflare Workers deploy Version ID と deploy後 smoke
 - CI quality-gate / e2e matrix の実行履歴 — `.github/workflows/ci.yml` および GitHub Actions の artifact (`playwright-report-{browser}`)
 
-axe / license inventory は本番 deploy 後のサイクルで `docs/evidence/` に追加予定。
+axe-core の critical / serious 0 件確認と license inventory も、同じ evidence index から確認できます。
 
 ## LLM Evaluation Harness
 

@@ -123,8 +123,8 @@ scripts/
 
 | 層 | 対象 | ツール | 件数 |
 |---|---|---|---|
-| Unit | `lib/auth` / `lib/rate-limit` / `lib/rate-limit-binding` / `lib/session` / `lib/sse-client` / `lib/pdf-extract` / eval helpers | Vitest | 135 |
-| E2E | 認証ゲート / SSEモック / 引用クリック / 429表示 | Playwright 5ブラウザmatrix | 5 scenarios |
+| Unit | `lib/auth` / `lib/rate-limit` / `lib/rate-limit-binding` / `lib/session` / `lib/sse-client` / `lib/pdf-extract` / eval helpers | Vitest | 149 |
+| E2E | 認証ゲート / SSEモック / 引用クリック / 429表示 / axe-core a11y | Playwright 5ブラウザmatrix | 8 scenarios |
 
 `pdf-extract.ts` は pdfjs-dist の Worker 依存で Node 環境では動かないため、抽出ロジックを `buildPageText` / `normalizeExtractedText` の pure 関数に分離して単体テスト可能にしています。
 
