@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "citation-reader",
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public",
+    // client disconnect を Request.signal.abort イベントで受け取るために必須。
+    // 未設定だと anthropicStream.abort() が発火せず、
+    // キャンセル後も Anthropic API 課金が継続する。
+    "enable_request_signal",
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "citation-reader",
+    },
+  ],
+  // Cloudflare Workers Rate Limiting binding。
+  // namespace_id は Cloudflare アカウント内で一意になるよう定義する正の整数文字列。
+  // 同じ namespace_id を別 Worker でも使うと、同一 key の rate limit counter を共有する。
+  // dev / Vitest 環境では binding が undefined なので src/lib/rate-limit-binding.ts
+  // が自動で in-memory fallback する設計。
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+  ],
+}
