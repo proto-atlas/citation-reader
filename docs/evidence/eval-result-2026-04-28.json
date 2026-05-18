@@ -1,0 +1,37 @@
+{
+  "runDate": "2026-04-28",
+  "mode": "live",
+  "baseUrl": "https://citation-reader.atlas-lab.workers.dev",
+  "sampleCount": 1,
+  "passed": true,
+  "note": "ACCESS_KEY and ANTHROPIC_API_KEY are never written to this evidence file. Inputs are short fictional fixtures from eval/sample-cases.json.",
+  "samples": [
+    {
+      "id": "ja-edge-summary",
+      "passed": true,
+      "status": 200,
+      "contentType": "text/event-stream; charset=utf-8",
+      "model": "claude-haiku-4-5-20251001",
+      "answerText": "エッジコンピューティングと AI 推論の融合が 2020 年代後半のアプリケーション設計の大きな潮流となっている一方で、Cloudflare Workers は CPU 時間 30 秒、メモリ 128 MiB の制約があるため、重い ML モデルを同梱することは現実的でないということが主要な論点です。",
+      "citationCount": 1,
+      "citations": [
+        {
+          "type": "char_location",
+          "cited_text": "エッジコンピューティングと AI 推論の融合は、2020 年代後半のアプリケーション設計における大きな潮流のひとつになっている。Cloudflare Workers は V8 isolates をベースに世界 330 以上の拠点で同時にコードを実行できる。しかし 1 リクエスト当たり CPU 時間 30 秒、メモリ 128 MiB の制約があり、重い ML モデルを Worker 内に同梱することは現実的でない。",
+          "document_index": 0,
+          "document_title": "User Document",
+          "start_char_index": 0,
+          "end_char_index": 208
+        }
+      ],
+      "usage": {
+        "input_tokens": 1027,
+        "output_tokens": 129,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0
+      },
+      "errors": [],
+      "eventCount": 7
+    }
+  ]
+}
