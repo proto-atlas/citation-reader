@@ -1,0 +1,20 @@
+{
+  "runDate": "2026-04-27",
+  "mode": "mock",
+  "sampleCount": 3,
+  "note": "liveモード未実装。evaluator関数群 (evaluators.ts) はVitestで個別カバー済。v0.2 で本番URLへのlive evaluationを実装予定。",
+  "samples": [
+    {
+      "id": "ja-edge-summary",
+      "questionLanguage": "ja"
+    },
+    {
+      "id": "en-cost-protection",
+      "questionLanguage": "en"
+    },
+    {
+      "id": "ja-citation-density",
+      "questionLanguage": "ja"
+    }
+  ]
+}

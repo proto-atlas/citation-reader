@@ -1,0 +1,20 @@
+{
+  "runDate": "2026-04-29",
+  "mode": "mock",
+  "sampleCount": 3,
+  "note": "mockモード。実Anthropic APIは呼び出さず、sample fixtureの読み込みとevidence書き出し経路だけを確認する。",
+  "samples": [
+    {
+      "id": "ja-edge-summary",
+      "questionLanguage": "ja"
+    },
+    {
+      "id": "en-cost-protection",
+      "questionLanguage": "en"
+    },
+    {
+      "id": "ja-citation-density",
+      "questionLanguage": "ja"
+    }
+  ]
+}
