@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-24.04
+    # GitHub hosted runnerの割り当て待ちで、step開始前に終了しないようにする。
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      # READMEがCIをtest:coverageと書く一方、
+      # 実CIはnpm run testでcoverage閾値を強制していなかった。
+      # vitest.config.tsの閾値をCIで機械的に強制する。
+      - name: Test coverage threshold
+        run: npm run test:coverage
+
+      - name: Check for secret patterns
+        run: bash scripts/check-secrets.sh
+
+      # 依存関係のhigh以上の脆弱性をCIで検出する:
+      # high以上のみでfailさせる。moderate (postcss / fast-xml-parser) は既知制約として
+      # README / SPECに記録済 (Next/OpenNext次リリース待ち、`audit fix --force` 不採用)。
+      - name: Audit dependencies (high+ only)
+        run: npm audit --audit-level=high
+
+      - name: Build
+        run: npm run build
+
+  e2e:
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
+      options: --user 1001
+    timeout-minutes: 60
+    needs: quality-check
+    # cross-browser CIをmatrixで並列実行。
+    # fail-fast: falseで 1 ブラウザの失敗で他を打ち切らず、全ブラウザの結果を取得。
+    # playwright.config.ts側でretries: 2 / screenshot: only-on-failure /
+    # trace: on-first-retryが設定済なので、flake対策とアーティファクト運用は揃う。
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit, mobile-chrome, mobile-safari]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Playwright tests (${{ matrix.browser }})
+        run: npm run e2e -- --project=${{ matrix.browser }}
+
+      - name: Upload Playwright report (${{ matrix.browser }})
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report/
+          retention-days: 14
+
+  deploy:
+    # mainへのpush時に自動デプロイする。
+    # mainへのpushのみdeployする。PRビルドではスキップ。
+    # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secretsがrepoに未設定の場合は手動deployにフォールバック。
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    needs: [quality-check, e2e]
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Skip deploy when Cloudflare secrets are absent
+        if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '' }}
+        run: echo "Cloudflare deploy skipped because CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not configured."
+
+      - name: Checkout
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        run: npm ci
+
+      - name: Build for Cloudflare Workers
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        # next build --webpack + opennextjs-cloudflare buildを別ステップで明示的に実行
+        # (deployジョブ内でwrangler deployのみ走らせ、build成果物を再利用)
+        run: |
+          npx next build --webpack
+          npx opennextjs-cloudflare build --skipNextBuild
+
+      - name: Deploy to Cloudflare Workers
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+          # Workers Secrets (ANTHROPIC_API_KEY / ACCESS_PASSWORD) はwrangler secret putで個別管理。
+          # 当ジョブはコード + アセットのdeployのみ担当する。
+          command: deploy
