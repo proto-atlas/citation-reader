@@ -1,5 +1,7 @@
 # citation-reader
 
+[![CI](https://github.com/proto-atlas/citation-reader/actions/workflows/ci.yml/badge.svg)](https://github.com/proto-atlas/citation-reader/actions/workflows/ci.yml)
+
 > 引用元付きのAI要約・Q&Aミニアプリ。Anthropic Citations APIとPrompt Cachingを使ったデモアプリです。
 
 テキストやPDFを投入すると、Claudeが要約と質問応答を返し、回答中のバッジをクリックすると原文の該当箇所がハイライトで示されます。公開URLでのAI API課金・乱用を抑えるため、実APIのQ&Aは招待制（アクセスキー方式）にしています。
